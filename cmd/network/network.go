@@ -2,11 +2,12 @@ package network
 
 import (
 	"encoding/json"
-	"main/cmd/display"
+	"fmt"
+	"main/cmd/renderer"
 )
 
 type Packages struct {
-	Frames []display.Frame `json:"frames"`
+	Frames []renderer.Frame `json:"frames"`
 }
 
 func (p *Packages) ToJson() ([]byte, error) {
@@ -14,8 +15,9 @@ func (p *Packages) ToJson() ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	jsonDataNewWithNewLine := append(jsonData, '\n')
+	// jsonDataNewWithNewLine := append(jsonData, '\n')
+	fmt.Printf("jsonData: %s\n", string(jsonData))
 
-	return jsonDataNewWithNewLine, err
+	return jsonData, err
 
 }

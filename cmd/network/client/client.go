@@ -2,75 +2,66 @@ package client
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"main/cmd/network"
 	"net"
 )
 
-type ClientSturct struct {
-	Username   string
-	ServerUrl  string
-	ServerPort string
-	ServerType string
-	Connection net.Conn
+type ClientStruct struct {
+	Username     string
+	ServerUrl    string
+	ServerPort   string
+	ServerType   string
+	TargetWidth  int32
+	TargetHeight int32
+	Connection   net.Conn
 }
 
 func InitClient(username string, serverUrl string,
-	serverPort string, serverType string) *ClientSturct {
-	var clientStruct ClientSturct
+	serverPort string, serverType string, width int32, height int32) *ClientStruct {
+	var clientStruct ClientStruct
 	clientStruct.Username = username
 	clientStruct.ServerUrl = serverUrl
 	clientStruct.ServerPort = serverPort
 	clientStruct.ServerType = serverType
-
+	clientStruct.TargetWidth = width
+	clientStruct.TargetHeight = height
 	return &clientStruct
 }
 
-func (c *ClientSturct) ConnectTcp() {
-	// Connect to TCP server
-	conn, err := net.Dial(c.ServerType, c.ServerUrl+":"+c.ServerPort)
+func (c *ClientStruct) SendTCPMessage(packages *network.Packages) error {
+	conn, err := net.Dial("tcp", c.ServerUrl+":"+c.ServerPort)
 	if err != nil {
-		fmt.Printf("Error connecting: %v\n", err)
-		return
+		return err
 	}
-	c.Connection = conn
 	defer conn.Close()
 
-	fmt.Println("Connected to TCP server. Type your message and press Enter.")
+	jsonData, err := json.Marshal(packages)
+	if err != nil {
+		return err
+	}
+    jsonData = append(jsonData, '\n')
 
-	// Start a goroutine to read responses from the server
-	go func() {
-		scanner := bufio.NewScanner(conn)
-		for scanner.Scan() {
-			fmt.Printf("Received from server: %s\n", scanner.Text())
-		}
-		if err := scanner.Err(); err != nil {
-			fmt.Printf("Error reading from server: %v\n", err)
-		}
-	}()
+	_, err = conn.Write(jsonData)
+	if err != nil {
+		return err
+	}
 
+	err = ResponseTCPMessage(conn)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (c *ClientSturct) SendMessage(packages *network.Packages) {
-	// Read user input and send to server
-
-	// scanner := bufio.NewScanner(os.Stdin)
-	// if !scanner.Scan() {
-	// 	fmt.Println("nothing")
-	// 	return
-	// }
-
-	jsonData, err := packages.ToJson()
+func ResponseTCPMessage(conn net.Conn) error {
+	resp, err := bufio.NewReader(conn).ReadString('\n')
 	if err != nil {
-		return
+		fmt.Printf("Error reading response: %v\n", err)
+		return err
 	}
-	c.Connection.Write(jsonData)
-	// _, err := fmt.Fprintln(c.Connection, message)
-	if err != nil {
-		fmt.Printf("Error sending message: %v\n", err)
-		return
-	}
-	// if err := scanner.Err(); err != nil {
-	// 	fmt.Printf("Error reading user input: %v\n", err)
-	// }
+	fmt.Printf("Response: %s", resp)
+	return nil
 }
