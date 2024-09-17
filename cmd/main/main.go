@@ -19,15 +19,15 @@ func main() {
 	}
 	if input == "y" {
 
-		var width int32
-		var height int32
-		img, err := screenshot.CaptureScreen()
-		if err != nil {
-			return
-		}
-		width = int32(img.Bounds().Dx())
-		height = int32(img.Bounds().Dy())
-		serverStruct := server.InitServerClient(width, height)
+		// var width int32
+		// var height int32
+		// img, err := screenshot.CaptureScreen()
+		// if err != nil {
+		// 	return
+		// }
+		// width = int32(img.Bounds().Dx())
+		// height = int32(img.Bounds().Dy())
+		serverStruct := server.InitServerClient()
 		fmt.Println("your hosting")
 		serverStruct.StartServer()
 	} else if input == "n" {

@@ -23,35 +23,76 @@ func InitRender(clientStruct *client.ClientStruct) {
 	// minimumWaitTime := time.Second
 
 	for {
-		startTime := time.Now()
 
-		frame, err := CaptureScreen(clientStruct.Width, clientStruct.Height,
-			clientStruct.ServerWidth, clientStruct.Height)
-		packages.Frames = append(packages.Frames, *frame)
+        startTime := time.Now()
 
-		if err != nil {
-			fmt.Println("Error capturing screen:", err)
-		}
+        // Capture 30 frames
+        for i := 0; i < 30; i++ {
+            frame, err := CaptureScreen(clientStruct.Width, clientStruct.Height,
+                clientStruct.ServerWidth, clientStruct.Height)
+            if err != nil {
+                fmt.Println("Error capturing screen:", err)
+                continue
+            }
+            packages.Frames = append(packages.Frames, *frame)
 
-		if !sendingInProgress {
-			sendingInProgress = true
-			go func(p network.Packages) {
-				fmt.Println("sending packet")
-				err := clientStruct.SendTCPMessage(&p)
-				if err != nil {
-					fmt.Println("Failed to send packet:", err)
-				}
-				sendingInProgress = false
-				// lastSendTime = time.Now()
-			}(packages)
-			packages = network.Packages{}
-		}
+            // Sleep for the remaining time to maintain frame rate
+            elapsed := time.Since(startTime)
+            sleepTime := frameDuration*time.Duration(i+1) - elapsed
+            if sleepTime > 0 {
+                time.Sleep(sleepTime)
+            }
+        }
 
-		elapsed := time.Since(startTime)
-		sleepTime := frameDuration - elapsed
-		if sleepTime > 0 {
-			time.Sleep(sleepTime)
-		}
+        // Send the package of 30 frames
+        if !sendingInProgress {
+            sendingInProgress = true
+            go func(p network.Packages) {
+                fmt.Println("sending packet of 30 frames")
+                err := clientStruct.SendTCPMessage(&p)
+                if err != nil {
+                    fmt.Println("Failed to send packet:", err)
+                }
+                sendingInProgress = false
+            }(packages)
+            packages = network.Packages{}
+        }
+
+        // Wait for the next 30-frame cycle
+        elapsed := time.Since(startTime)
+        sleepTime := frameDuration*30 - elapsed
+        if sleepTime > 0 {
+            time.Sleep(sleepTime)
+        }
+		// startTime := time.Now()
+		//
+		// frame, err := CaptureScreen(clientStruct.Width, clientStruct.Height,
+		// 	clientStruct.ServerWidth, clientStruct.Height)
+		// packages.Frames = append(packages.Frames, *frame)
+		//
+		// if err != nil {
+		// 	fmt.Println("Error capturing screen:", err)
+		// }
+		//
+		// if !sendingInProgress {
+		// 	sendingInProgress = true
+		// 	go func(p network.Packages) {
+		// 		fmt.Println("sending packet")
+		// 		err := clientStruct.SendTCPMessage(&p)
+		// 		if err != nil {
+		// 			fmt.Println("Failed to send packet:", err)
+		// 		}
+		// 		sendingInProgress = false
+		// 		// lastSendTime = time.Now()
+		// 	}(packages)
+		// 	packages = network.Packages{}
+		// }
+		//
+		// elapsed := time.Since(startTime)
+		// sleepTime := frameDuration - elapsed
+		// if sleepTime > 0 {
+		// 	time.Sleep(sleepTime)
+		// }
 	}
 }
 

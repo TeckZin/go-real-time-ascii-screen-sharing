@@ -9,23 +9,23 @@ import (
 	"net"
 	"strconv"
 	"time"
+
+	"github.com/vova616/screenshot"
 )
 
 type ServerStruct struct {
 	URL  string
 	Port string
 	Type string
-    Height int32
-    Width int32
+
 }
 
-func InitServerClient(width int32, height int32) *ServerStruct {
+func InitServerClient() *ServerStruct {
 	serverStruct := ServerStruct{
 		URL:  "localhost",
 		Port: "8080",
 		Type: "tcp",
-        Height: height,
-        Width: width,
+
 	}
 	return &serverStruct
 }
@@ -60,6 +60,13 @@ func (s *ServerStruct) StartServer() {
 func (s *ServerStruct)handleConnection(conn net.Conn) {
 	defer conn.Close()
 
+    img, err := screenshot.CaptureScreen()
+		if err != nil {
+			return
+		}
+    width := int32(img.Bounds().Dx())
+    height := int32(img.Bounds().Dy())
+
 	packages, err := receivePackages(conn)
 	if err != nil {
 		fmt.Printf("Error receiving packages: %v\n", err)
@@ -69,7 +76,7 @@ func (s *ServerStruct)handleConnection(conn net.Conn) {
 
 	// fmt.Printf("Received packages: %+v\n", packages)
 
-    message := strconv.Itoa(int(s.Width)) + ":" + strconv.Itoa(int(s.Height))+ "\n"
+    message := strconv.Itoa(int(width)) + ":" + strconv.Itoa(int(height))+ "\n"
 	err = sendResponse(conn, message)
 	if err != nil {
 		fmt.Printf("Error sending response: %v\n", err)
@@ -103,36 +110,44 @@ func sendResponse(conn net.Conn, message string ) error {
 func (server *ServerStruct) DisplayPackage(packages *network.Packages) {
 
 	targetFPS := 30
-	// currFps := 0
 	frameDuration := time.Second / time.Duration(targetFPS)
 
-    for _, frame := range packages.Frames {
 
-            startTime := time.Now()
+    fmt.Print("\033[H")
 
-            elasped := time.Since(startTime)
+    for frameIndex, frame := range packages.Frames {
+        startTime := time.Now()
 
+        var asciiImage display.AsciiImage
+        asciiImage.PixelMap = frame.Pixels
+        asciiImage.GetAnsiEncoding()
 
-            sleepTime := frameDuration - elasped
-            if sleepTime > 0 {
-                time.Sleep(sleepTime)
+        // If it's not the first frame, move cursor back to top
+        if frameIndex > 0 {
+            fmt.Printf("\033[%dA", len(asciiImage.PixelMap))
+        }
+
+        for y, pixelRow := range asciiImage.PixelMap {
+            // Clear the current line
+            fmt.Print("\033[2K")
+
+            for x, pixel := range pixelRow {
+                fmt.Print(string(*asciiImage.ANSIEncodingMap[y][x]))
+                fmt.Print(string(pixel.Values[3]))
+                fmt.Print("\033[0m")
             }
 
-            var asciiImage display.AsciiImage
-            asciiImage.PixelMap = frame.Pixels
-
-            asciiImage.GetAnsiEncoding()
-
-            for y, pixelRow := range asciiImage.PixelMap {
-                for x, pixel := range pixelRow {
-                    fmt.Print(string(*asciiImage.ANSIEncodingMap[y][x]))
-                    fmt.Print(string(pixel.Values[3]))
-                    fmt.Print("\033[0m")
-
-                }
-                fmt.Println()
+            // Move to the next line
+            if y < len(asciiImage.PixelMap)-1 {
+                fmt.Print("\r\n")
             }
         }
 
+        elapsed := time.Since(startTime)
+        sleepTime := frameDuration - elapsed
+        if sleepTime > 0 {
+            time.Sleep(sleepTime)
+        }
+    }
 }
 
