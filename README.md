@@ -89,7 +89,7 @@ Contributions are welcome! Feel free to submit a Pull Request or create an Issue
 
 ## License
 
-[MIT](https://choosealicense.com/licenses/mit/)
+None
 
 ## Project Status
 
