@@ -49,7 +49,7 @@ type Frame struct {
 }
 ```
 
-- `Pixel`: Represents a single pixel with 4 byte values (likely RGBA).
+- `Pixel`: Represents a single pixel with 4 byte values R G B for the first 3 respectfully, and the last byte for ASCII.
 - `Frame`: Represents a full frame as a 2D slice of pixels.
 
 These structures are designed to be easily serializable to JSON for network transmission.
