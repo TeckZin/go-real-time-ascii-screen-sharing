@@ -2,7 +2,7 @@ package display
 
 import (
 	"fmt"
-	"main/cmd/renderer"
+	"main/internal/renderer"
 	"math"
 )
 

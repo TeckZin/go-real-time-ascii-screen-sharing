@@ -2,9 +2,9 @@ package screen_capture
 
 import (
 	"fmt"
-	"main/cmd/network"
-	"main/cmd/network/client"
-	"main/cmd/renderer"
+	"main/internal/network"
+	"main/internal/network/client"
+	"main/internal/renderer"
 	"math"
 	"time"
 

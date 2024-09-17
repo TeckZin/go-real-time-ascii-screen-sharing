@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"main/cmd/network"
+	"main/internal/network"
 	"net"
 	"strconv"
 	"strings"

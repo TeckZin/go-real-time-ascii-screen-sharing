@@ -3,7 +3,7 @@ package network
 import (
 	"encoding/json"
 	"fmt"
-	"main/cmd/renderer"
+	"main/internal/renderer"
 )
 
 type Packages struct {

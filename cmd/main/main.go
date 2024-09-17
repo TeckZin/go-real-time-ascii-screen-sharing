@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"main/cmd/network/client"
-	"main/cmd/network/server"
-	"main/cmd/screen_capture"
+	"main/internal/network/client"
+	"main/internal/network/server"
+	"main/internal/screen_capture"
 
 	"github.com/vova616/screenshot"
 )
