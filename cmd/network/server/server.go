@@ -48,7 +48,7 @@ func (s *ServerStruct) StartServer() {
 
 	for {
 		conn, err := listener.Accept()
-        fmt.Println("new connection")
+        // fmt.Println("new connection")
 		if err != nil {
 			fmt.Printf("Error accepting connection: %v\n", err)
 			continue
@@ -69,7 +69,8 @@ func (s *ServerStruct)handleConnection(conn net.Conn) {
 
 	// fmt.Printf("Received packages: %+v\n", packages)
 
-	err = sendResponse(conn)
+    message := strconv.Itoa(int(s.Width)) + ":" + strconv.Itoa(int(s.Height))+ "\n"
+	err = sendResponse(conn, message)
 	if err != nil {
 		fmt.Printf("Error sending response: %v\n", err)
 	}
@@ -93,8 +94,9 @@ func receivePackages(conn net.Conn) (*network.Packages, error) {
 	return &packages, nil
 }
 
-func sendResponse(conn net.Conn) error {
-	_, err := conn.Write([]byte("Package received\n"))
+func sendResponse(conn net.Conn, message string ) error {
+
+    _, err :=  conn.Write([]byte(message))
 	return err
 }
 

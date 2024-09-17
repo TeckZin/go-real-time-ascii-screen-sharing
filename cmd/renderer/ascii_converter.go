@@ -1,7 +1,6 @@
 package renderer
 
 import (
-	"fmt"
 	"image"
 
 	"golang.org/x/image/draw"
@@ -26,7 +25,6 @@ func ReadImage(image image.Image) (*RenderImage, error) {
 
 	img.Height = bounds.Max.Y
 	img.Width = bounds.Max.X
-	fmt.Println("image set")
 
 	return &img, nil
 

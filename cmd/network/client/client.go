@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"main/cmd/network"
 	"net"
+	"strconv"
+	"strings"
 )
 
 type ClientStruct struct {
@@ -13,8 +15,10 @@ type ClientStruct struct {
 	ServerUrl    string
 	ServerPort   string
 	ServerType   string
-	TargetWidth  int32
-	TargetHeight int32
+	Width  int32
+	Height int32
+    ServerWidth int32
+    ServerHeight int32
 	Connection   net.Conn
 }
 
@@ -25,12 +29,15 @@ func InitClient(username string, serverUrl string,
 	clientStruct.ServerUrl = serverUrl
 	clientStruct.ServerPort = serverPort
 	clientStruct.ServerType = serverType
-	clientStruct.TargetWidth = width
-	clientStruct.TargetHeight = height
+	clientStruct.Width = width
+	clientStruct.Height = height
+    clientStruct.ServerWidth = int32(0)
+    clientStruct.ServerHeight = int32(0)
+
 	return &clientStruct
 }
 
-func (c *ClientStruct) SendTCPMessage(packages *network.Packages) error {
+func (c *ClientStruct) SendTCPMessage(packages *network.Packages)  error {
 	conn, err := net.Dial("tcp", c.ServerUrl+":"+c.ServerPort)
 	if err != nil {
 		return err
@@ -47,21 +54,45 @@ func (c *ClientStruct) SendTCPMessage(packages *network.Packages) error {
 	if err != nil {
 		return err
 	}
+    width, height, err := c.ResponseTCPMessage(conn)
 
-	err = ResponseTCPMessage(conn)
 	if err != nil {
 		return err
 	}
+
+    c.ServerWidth = width
+
+    c.ServerHeight = height
+
+
 
 	return nil
 }
 
-func ResponseTCPMessage(conn net.Conn) error {
+
+func (c *ClientStruct)ResponseTCPMessage(conn net.Conn) (int32, int32, error) {
 	resp, err := bufio.NewReader(conn).ReadString('\n')
 	if err != nil {
 		fmt.Printf("Error reading response: %v\n", err)
-		return err
+		return 0,0, err
 	}
-	fmt.Printf("Response: %s", resp)
-	return nil
+
+    resp = resp[:len(resp)-1]
+    res := strings.Split(resp, ":")
+
+	fmt.Printf("Response: %s\n",resp)
+    if len(res) == 2 {
+        width, err := strconv.Atoi(res[0])
+        if err != nil {
+            return 0, 0, err
+        }
+        height, err := strconv.Atoi(res[1])
+        if err != nil {
+            return 0, 0, err
+        }
+        return int32(width), int32(height), nil
+
+    }
+
+	return 0, 0, nil
 }

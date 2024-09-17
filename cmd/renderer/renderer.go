@@ -1,12 +1,5 @@
 package renderer
 
-import (
-	"math"
-)
-
-
-const IMG_RATIO float64 = 50.0
-
 type RendererColor struct {
 	R, G, B uint8
 }
@@ -26,13 +19,11 @@ func (img *RenderImage) GetFrame(width int32, height int32) (*Frame, error) {
 	// newFrame.Pixels = make([][]*Pixel, height)
 
 	// img.ScaleImageRatio(IMG_SCALE)
-    var tWidth int32 = int32(math.Round(float64(width)/IMG_RATIO))
-    var tHeight int32 = int32(math.Round(float64(height)/IMG_RATIO))
 
-    img.ScaleImageBounds(tWidth, tHeight)
+    img.ScaleImageBounds(width, height)
 
-  	img.Width = int(tWidth)
-	img.Height = int(tHeight)
+  	img.Width = int(width)
+	img.Height = int(height)
 	// fmt.Println("got scale")
 
 	img.GetBrightness()
@@ -44,7 +35,7 @@ func (img *RenderImage) GetFrame(width int32, height int32) (*Frame, error) {
 	// fmt.Println("image")
 	// fmt.Println(img.BrightnessMap)
 
-	newFrame.convertBrightnessToAscii(img.BrightnessMap, tWidth, tHeight)
+	newFrame.convertBrightnessToAscii(img.BrightnessMap, width, height)
 	// fmt.Println(img.BrightnessMap)
 	// fmt.Println("converted to brightness")
 	// fmt.Println(newFrame)

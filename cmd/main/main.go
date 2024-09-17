@@ -21,12 +21,12 @@ func main() {
 
 		var width int32
 		var height int32
-	    img, err := screenshot.CaptureScreen()
-	    if err != nil {
-		    return
-        }
-        width = int32(img.Bounds().Dx())
-        height = int32(img.Bounds().Dy())
+		img, err := screenshot.CaptureScreen()
+		if err != nil {
+			return
+		}
+		width = int32(img.Bounds().Dx())
+		height = int32(img.Bounds().Dy())
 		serverStruct := server.InitServerClient(width, height)
 		fmt.Println("your hosting")
 		serverStruct.StartServer()
@@ -55,15 +55,17 @@ func main() {
 			return
 		}
 
-	    img, err := screenshot.CaptureScreen()
-	    if err != nil {
-		    return
-        }
-        width = int32(img.Bounds().Dx())
-        height = int32(img.Bounds().Dy())
+		img, err := screenshot.CaptureScreen()
+		if err != nil {
+			return
+		}
+		width = int32(img.Bounds().Dx())
+		height = int32(img.Bounds().Dy())
 
 		clientSruct := client.InitClient(usr, url, port, "tcp", width, height)
 		screen_capture.InitRender(clientSruct)
+
+
 
 	}
 
